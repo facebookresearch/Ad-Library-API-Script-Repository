@@ -100,10 +100,10 @@ class FbAdsLibraryTraversal:
 
             filtered = list(
                 filter(
-                    lambda ad_archive: datetime.strptime(
-                        ad_archive["ad_delivery_start_time"], "%Y-%m-%dT%H:%M:%S%z"
+                    lambda ad_archive: ("ad_delivery_start_time" in ad_archive) and (
+                        datetime.strptime(ad_archive["ad_delivery_start_time"], "%Y-%m-%d"
                     ).timestamp()
-                    >= start_time_cutoff_after,
+                    >= start_time_cutoff_after),
                     response_data["data"],
                 )
             )
