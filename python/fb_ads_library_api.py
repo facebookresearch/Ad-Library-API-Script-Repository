@@ -6,9 +6,10 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from datetime import datetime
 import json
 import re
+from datetime import datetime
+
 import requests
 
 
@@ -76,9 +77,7 @@ class FbAdsLibraryTraversal:
     ):
         last_error_url = None
         last_retry_count = 0
-        start_time_cutoff_after = datetime.strptime(
-            after_date, "%Y-%m-%d"
-        ).timestamp()
+        start_time_cutoff_after = datetime.strptime(after_date, "%Y-%m-%d").timestamp()
 
         while next_page_url is not None:
             response = requests.get(next_page_url)
@@ -100,10 +99,13 @@ class FbAdsLibraryTraversal:
 
             filtered = list(
                 filter(
-                    lambda ad_archive: ("ad_delivery_start_time" in ad_archive) and (
-                        datetime.strptime(ad_archive["ad_delivery_start_time"], "%Y-%m-%d"
-                    ).timestamp()
-                    >= start_time_cutoff_after),
+                    lambda ad_archive: ("ad_delivery_start_time" in ad_archive)
+                    and (
+                        datetime.strptime(
+                            ad_archive["ad_delivery_start_time"], "%Y-%m-%d"
+                        ).timestamp()
+                        >= start_time_cutoff_after
+                    ),
                     response_data["data"],
                 )
             )
