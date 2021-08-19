@@ -9,7 +9,7 @@ import argparse
 import sys
 
 from fb_ads_library_api import FbAdsLibraryTraversal
-from fb_ads_library_api_operators import get_operators
+from fb_ads_library_api_operators import get_operators, save_to_csv
 from fb_ads_library_api_utils import get_country_code, is_valid_fields
 
 
@@ -130,9 +130,14 @@ def main():
         api.after_date = opts.after_date
     generator_ad_archives = api.generate_ad_archives()
     if opts.action in get_operators():
-        get_operators()[opts.action](
-            generator_ad_archives, opts.args, is_verbose=opts.verbose
-        )
+        if opts.action == "save_to_csv":
+            save_to_csv(
+                generator_ad_archives, opts.args, opts.fields, is_verbose=opts.verbose
+            )
+        else:
+            get_operators()[opts.action](
+                generator_ad_archives, opts.args, is_verbose=opts.verbose
+            )
     else:
         print("Invalid 'action' value: %s" % opts.action)
         sys.exit(1)

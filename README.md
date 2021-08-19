@@ -14,6 +14,8 @@ Note: please replace the '{access_token}' with your [Facebook Developer access t
 Ads-Library-API-Script-Repository requires or works with
 * Mac OS X or Linux or Window
 * Python 3.0+
+* Python Requests Library ([installation](https://docs.python-requests.org/en/master/user/install/#install))
+* Python iso3166 Library ([installation](https://pypi.org/project/iso3166/))
 
 
 ## How Ads-Library-API-Script-Repository works

@@ -22,6 +22,7 @@ def get_operators():
     return {
         "count": count_ads,
         "save": save_to_file,
+        "save_to_csv": save_to_csv,
         "start_time_trending": count_start_time_trending,
     }
 
@@ -58,6 +59,46 @@ def save_to_file(generator_ad_archives, args, is_verbose=False):
     print("Total number of ads wrote: %d" % count)
 
 
+def save_to_csv(generator_ad_archives, args, fields, is_verbose=False):
+    """
+    Save all retrieved ad_archives to the output file. Each ad_archive will be
+    stored as a row in the CSV
+    """
+    if len(args) != 1:
+        raise Exception("save_to_csv action takes 1 argument: output_file")
+
+    delimiter = ","
+    total_count = 0
+    output = fields + "\n"
+    output_file = args[0]
+
+    for ad_archives in generator_ad_archives:
+        total_count += len(ad_archives)
+        if is_verbose:
+            print("Items processed: %d" % total_count)
+        for ad_archive in ad_archives:
+            for field in list(fields.split(delimiter)):
+                if field in ad_archive:
+                    value = ad_archive[field]
+                    if (type(value) == list and type(value[0]) == dict) or type(
+                        value
+                    ) == dict:
+                        value = json.dumps(value)
+                    elif type(value) == list:
+                        value = delimiter.join(value)
+                    output += (
+                        '"' + value.replace("\n", "").replace('"', "") + '"' + delimiter
+                    )
+                else:
+                    output += delimiter
+            output = output.rstrip(",") + "\n"
+
+    with open(output_file, "w") as csvfile:
+        csvfile.write(output)
+
+    print("Successfully wrote data to file: %s" % output_file)
+
+
 def count_start_time_trending(generator_ad_archives, args, is_verbose=False):
     """
     output the count trending of ads by start date;
@@ -77,7 +118,7 @@ def count_start_time_trending(generator_ad_archives, args, is_verbose=False):
         start_dates = list(
             map(
                 lambda data: datetime.datetime.strptime(
-                    data["ad_delivery_start_time"], "%Y-%m-%dT%H:%M:%S%z"
+                    data["ad_delivery_start_time"], "%Y-%m-%d"
                 ).strftime("%Y-%m-%d"),
                 ad_archives,
             )
