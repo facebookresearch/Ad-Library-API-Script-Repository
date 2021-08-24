@@ -6,7 +6,7 @@ Here's an example on how to use the CLI:
 
     $ python fb_ads_library_api_cli.py -t {access_token} -f 'page_id,ad_snapshot_url,funding_entity,ad_delivery_start_time' -c 'CA' -s '.' -v count
 
-It count the number of active polictical ads that are running in CA(Canada);
+It would count the number of all polictical ads in CA(Canada);
 
 Note: please replace the '{access_token}' with your [Facebook Developer access token](https://developers.facebook.com/tools/accesstoken/).
 

@@ -35,7 +35,7 @@ class FbAdsLibraryTraversal:
         search_term,
         country,
         search_page_ids="",
-        ad_active_status="active",
+        ad_active_status="ALL",
         after_date="1970-01-01",
         page_limit=500,
         api_version=None,
