@@ -59,7 +59,7 @@ valid_query_fields = [
     "currency",
     "delivery_by_region",
     "demographic_distribution",
-    "funding_entity",
+    "bylines",
     "id",
     "impressions",
     "languages",
