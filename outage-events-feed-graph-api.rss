@@ -1,0 +1,22 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+
+  <channel>
+  	<title>Graph API Status</title>
+  	<link>https://metastatus.com/graph-api</link>
+  	<atom:link href="https://metastatus.com/outage-events-feed-graph-api.rss" rel="self" type="application/rss+xml" />
+  	<description>Status updates for Graph API</description>
+  	<lastBuildDate>Fri, 18 Nov 2022 02:07:14 GMT</lastBuildDate>
+  	<item>
+        		<title>[Some disruptions]: Platform Status</title>
+        		<link>https://metastatus.com/graph-api</link>
+        		<guid isPermaLink="false">Platform Status update at: Fri, 18 Nov 2022 02:07:14 GMT</guid>
+        		<description>Were aware that some developers may be having trouble changing ad campaign budgets using the Marketing API. Our engineering teams are aware and actively working to resolve the issue as quickly as possible.</description>
+        		<pubDate>Fri, 18 Nov 2022 02:07:14 GMT</pubDate>
+        	</item>
+        
+  </channel>
+
+  </rss>
+  
