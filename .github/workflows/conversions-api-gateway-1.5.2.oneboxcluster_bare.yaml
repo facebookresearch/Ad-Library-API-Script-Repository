@@ -1,0 +1,630 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Conversions API Gateway - v1.5.2"
+Parameters:
+  AdminEmail:
+    Description: "Email address to sign in to Conversions API Gateway"
+    Type: String
+    AllowedPattern: "^[\\w!#$%&'*+/=?^`{|}~-]+(:?.[\\w!#$%&'*+/=?^`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$"
+    ConstraintDescription: "Please input an email address to sign in to Conversions API Gateway"
+  
+  InstanceType:
+    Description: "Please choose instance type for Conversions API Gateway based on your website traffic."
+    Type: String
+    Default: m5.large-supports-less-than-100-requests-per-second
+    AllowedValues:
+    - m5.large-supports-less-than-100-requests-per-second
+    - m5.xlarge-supports-less-than-1000-requests-per-second
+    - m5.2xlarge-supports-less-than-2000-requests-per-second
+    ConstraintDescription: "Please choose the instance type for Conversions API Gateway."
+  AdminPassword:
+    Description: "Password to sign in to Conversions API Gateway (at least 12 characters, please write it down in safe place)"
+    Type: String
+    NoEcho: true
+    AllowedPattern: "^[a-zA-Z0-9 ~!@#$%^&*_+=-]{12,}$"
+    ConstraintDescription: "Only Alphanumeric characters and ~!@#$%^&*_+=- symbols can be used in password. Password must be at least 12 characters."
+  ConfirmAdminPassword:
+    Description: "Please confirm the admin password here"
+    Type: String
+    NoEcho: true
+    AllowedPattern: "^[a-zA-Z0-9 ~!@#$%^&*_+=-]{12,}$"
+    ConstraintDescription: "Only Alphanumeric characters and ~!@#$%^&*_+=- symbols can be used in password. Password must be at least 12 characters."
+  
+  ProvisioningData:
+    Description: "DO NOT EDIT! Provisioning data for setting up your Conversions API Gateway. This field should already be populated."
+    Type: String
+  
+  AdminDomainName:
+    Description: "DO NOT EDIT! Subdomain used for Conversions API Gateway"
+    Type: String
+    AllowedPattern: '^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,63}$'
+  
+  
+  
+  
+  
+  Telemetry:
+    Description: 'Would you like to periodically send data about the Conversions API Gateway installation to Facebook? This data will be used to monitor the effect of each released version and provide support personnel with additional context when troubleshooting problems'
+    Type: String
+    AllowedValues:
+      - "Yes (Recommended)"
+      - "No"
+    ConstraintDescription: "Please select a value for the Telemetry field from the drop-down."
+  
+  
+  
+Conditions:
+  
+  EnableTelemetry:
+    Fn::Equals: ["Yes (Recommended)", !Ref Telemetry]
+  
+
+Mappings:
+  InstanceTypeMapping:
+    m5.large-supports-less-than-100-requests-per-second:
+      Type: m5.large
+    m5.xlarge-supports-less-than-1000-requests-per-second:
+      Type: m5.xlarge
+    m5.2xlarge-supports-less-than-2000-requests-per-second:
+      Type: m5.2xlarge
+  InstanceType2EBSVolume:
+    m5.large:
+      Volume: 100
+    m5.xlarge:
+      Volume: 150
+    m5.2xlarge:
+      Volume: 200
+  Ec2InstanceConnectIPRanges:
+  # Ref: https://ip-ranges.amazonaws.com/ip-ranges.json
+    ap-northeast-1:
+      Range: "3.112.23.0/29"
+    eu-west-1:
+      Range: "18.202.216.48/29"
+    us-east-1:
+      Range: "18.206.107.24/29"
+    us-west-2:
+      Range: "18.237.140.160/29"
+    us-west-1:
+      Range: "13.52.6.112/29"
+    ap-southeast-1:
+      Range: "3.0.5.32/29"
+    ap-south-1:
+      Range: "13.233.177.0/29"
+    eu-central-1:
+      Range: "3.120.181.40/29"
+    sa-east-1:
+      Range: "18.228.70.32/29"
+    ap-northeast-2:
+      Range: "13.209.1.56/29"
+    ap-southeast-2:
+      Range: "13.239.158.0/29"
+    eu-north-1:
+      Range: "13.48.4.200/30"
+    eu-west-3:
+      Range: "35.180.112.80/29"
+    us-east-2:
+      Range: "3.16.146.0/29"
+    eu-west-2:
+      Range: "3.8.37.24/29"
+    ca-central-1:
+      Range: "35.183.92.176/29"
+    af-south-1:
+      Range: "13.244.121.196/30"
+  AWSInstanceType2Arch: 
+    t3.large:
+      Arch: HVM64
+    t3.xlarge:
+      Arch: HVM64
+    m5a.large:
+      Arch: HVM64
+    m5a.xlarge:
+      Arch: HVM64
+    m5.large:
+      Arch: HVM64
+    m5.xlarge:
+      Arch: HVM64
+    m5.2xlarge:
+      Arch: HVM64
+
+  
+  AWSRegionArch2AMI:     
+    us-east-1: # US East (N. Virginia)
+      HVM64: "ami-0e97514749074f4c6"
+    us-east-2: # US East (Ohio)
+      HVM64: "ami-0084546a578759aff"
+    us-west-1: # US West (N. California)
+      HVM64: "ami-0264acdf1c8c0c853"
+    us-west-2: # US West (Oregon)
+      HVM64: "ami-0493f8b5d4ae9e1eb"
+    af-south-1: # Africa (Cape Town)
+      HVM64: "ami-0a3d8eebd660d8410"
+    ap-south-1: # Asia Pacific (Mumbai)
+      HVM64: "ami-0b21cde498c006157"
+    ap-northeast-2: # Asia Pacific (Seoul)
+      HVM64: "ami-0bf4a867095c57cbc"
+    ap-southeast-1: # Asia Pacific (Singapore)
+      HVM64: "ami-0d88b41d43275179c"
+    ap-southeast-2: # Asia Pacific (Sydney)
+      HVM64: "ami-01936ff6a075f79d0"
+    ap-northeast-1: # Asia Pacific (Tokyo)
+      HVM64: "ami-0ce597ff54084f0f6"
+    ca-central-1: # Canada (Central)
+      HVM64: "ami-023d25ac5b15ebc41"
+    eu-central-1: # Europe (Frankfurt)
+      HVM64: "ami-028a64864f4e2e4d2"
+    eu-west-1: # Europe (Ireland)
+      HVM64: "ami-0eedbdf6fb6fac4f6"
+    eu-west-2: # Europe (London)
+      HVM64: "ami-0b35eaeefa68c37d9"
+    eu-south-1: # Europe (Milan)
+      HVM64: "ami-06fb8bab8ad6d0d84"
+    eu-west-3: # Europe (Paris)
+      HVM64: "ami-01441a0f0deca1fc0"
+    eu-north-1: # Europe (Stockholm)
+      HVM64: "ami-086bfa5c9ccd91444"
+    me-south-1: # Middle East (Bahrain)
+      HVM64: "ami-0ad478743106c53ca"
+    sa-east-1: # South America (São Paulo)
+      HVM64: "ami-01be885d7ce3a81bf"
+
+  
+Rules:
+  ConfirmPasswordsMatch:
+    Assertions:
+      - Assert:
+          Fn::Equals:
+            - !Ref AdminPassword
+            - !Ref ConfirmAdminPassword
+        AssertDescription: Passwords do not match
+Resources:
+  
+  # If usesNLB, advertiser provides custom VPC and subnet
+  
+# Contents are derived from ../../infra/vpc.yaml
+# We not removing the original one and leaving it there as we need to confirm how it is used before removing it.
+  # VPC for CloudBridge
+  CustomVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}/VPC
+
+  # Associate an Amazon provided IPv6 to VPC
+  IPv6CidrBlock:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      VpcId: !Ref CustomVPC
+      AmazonProvidedIpv6CidrBlock: true
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref CustomVPC
+      AvailabilityZone: !Select [ 0, !GetAZs ]
+      CidrBlock: 172.31.0.0/20
+      Ipv6CidrBlock:
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '00::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt CustomVPC.Ipv6CidrBlocks ]]]
+      MapPublicIpOnLaunch: true
+      AssignIpv6AddressOnCreation: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}/VPC/Public/Subnet/AZ1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref CustomVPC
+      AvailabilityZone: !Select [ 1, !GetAZs ]
+      CidrBlock: 172.31.16.0/20
+      Ipv6CidrBlock:
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '01::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt CustomVPC.Ipv6CidrBlocks ]]]
+      MapPublicIpOnLaunch: true
+      AssignIpv6AddressOnCreation: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}/VPC/Public/Subnet/AZ2
+
+  
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}/VPC/IGW
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn: InternetGateway
+    Properties:
+      VpcId: !Ref CustomVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # Will be used by IPv6 hosts
+  EgressOnlyInternetGateway:
+    Type: AWS::EC2::EgressOnlyInternetGateway
+    Properties:
+      VpcId: !Ref CustomVPC
+
+  PublicRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CustomVPC
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}/VPC/Public/Route/AZ1
+
+  PublicRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CustomVPC
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}/VPC/Public/Route/AZ2
+
+  PublicRoute1:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicIpv6Route1:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable1
+      DestinationIpv6CidrBlock: ::/0
+      GatewayId: !Ref InternetGateway
+
+  PublicRoute2:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicIpv6Route2:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable2
+      DestinationIpv6CidrBlock: ::/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable2
+
+  
+  
+
+  IPv6Provider:
+    Type: Custom::IPv6Provider
+    Properties:
+      ServiceToken: !GetAtt IPv6ProviderLambda.Arn
+      InstanceId: !Ref ConversionsApiGatewayEC2Instance
+
+  IPv6ProviderLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import boto3
+          from botocore.vendored import requests
+          import cfnresponse
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          ec2 = boto3.client('ec2')
+
+          def handler(event, context):
+            logger.info('got event {}'.format(event))
+            responseData = {}
+
+            if event['RequestType'] == 'Create':
+              response = ec2.describe_instances(
+                  InstanceIds=[
+                      event['ResourceProperties']['InstanceId']
+                  ]
+              )
+              ipv6 = response['Reservations'][0]['Instances'][0]['NetworkInterfaces'][0]['Ipv6Addresses'][0]['Ipv6Address']
+              responseData['Ipv6Address'] = ipv6
+
+            logger.info('responseData {}'.format(responseData))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+
+      Handler: index.handler
+      Timeout: 30
+      Role: !GetAtt IPv6ProviderLambdaRole.Arn
+      Runtime: python3.9
+
+  IPv6ProviderLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-IPv6ProviderLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/*
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                Resource: '*'
+  
+  
+  
+  ConversionsApiGatewayIamRole:
+    
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/conversions-api-gateway/"
+      Description: "Instance Profile Role for Conversions API Gateway Hosts"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-Ec2InstancePolicy
+          PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                    - logs:PutRetentionPolicy
+                  Resource:
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${AdminDomainName}/conversions-api-gateway
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${AdminDomainName}/conversions-api-gateway:log-stream:*
+                
+                
+                
+  ConversionsApiGatewayInstanceProfile:
+    
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: !Join ["-", ["ConversionsApiGatewayInstanceProfile", !Ref AWS::Region, !Select [4, !Split ['-', !Select [2, !Split ['/', !Ref AWS::StackId]]]], !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref AWS::StackId]]]]]]
+      Path: "/conversions-api-gateway/"
+      Roles:
+        - Ref: "ConversionsApiGatewayIamRole"
+  
+  ConversionsApiGatewaySecurityGroup:
+    
+    Type: AWS::EC2::SecurityGroup
+    
+    DependsOn:
+    - CustomVPC
+    - IPv6CidrBlock
+    
+    Properties:
+      GroupDescription: "Enable limited SSH access (through AWS IP address ranges - https://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html) and http(s) access"
+      SecurityGroupIngress:
+      
+      - IpProtocol: tcp
+        FromPort: "80"
+        ToPort: "80"
+      
+        CidrIp: "0.0.0.0/0"
+      
+      - IpProtocol: tcp
+        FromPort: "80"
+        ToPort: "80"
+      
+        CidrIpv6: "::/0"
+      
+      
+      - IpProtocol: tcp
+        FromPort: "443"
+        ToPort: "443"
+        CidrIp: "0.0.0.0/0"
+      - IpProtocol: tcp
+        FromPort: "443"
+        ToPort: "443"
+        CidrIpv6: "::/0"
+      
+      
+      
+      VpcId: !Ref CustomVPC
+      
+  
+  ConversionsApiGatewayEC2Instance: 
+    Type: AWS::EC2::Instance
+    
+    
+    DependsOn:
+    - CustomVPC
+    
+    
+
+    Properties:
+      ImageId:
+        Fn::FindInMap:
+        - AWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - AWSInstanceType2Arch
+          - Fn::FindInMap:
+            - InstanceTypeMapping
+            - Ref: InstanceType
+            - Type
+          - Arch
+      InstanceType:
+        Fn::FindInMap:
+          - InstanceTypeMapping
+          - Ref: InstanceType
+          - Type
+      SecurityGroupIds: [ !GetAtt "ConversionsApiGatewaySecurityGroup.GroupId" ]
+      
+      
+      IamInstanceProfile:
+        
+        !Ref ConversionsApiGatewayInstanceProfile
+        
+      
+      
+      UserData:
+        Fn::Base64:
+          Fn::Sub:
+          - "#cloud-config\nwrite_files:\n- path: /opt/cloudbridge/var/cluster_type\n  content: awsec2\nruncmd:\n  - [ wget, \"https://conversions-api-gateway-release-production.s3.amazonaws.com/conversions-api-gateway-1.5.2_provision_web.run\", -O, \"/root/conversions-api-gateway-1.5.2_provision_web.run\", \"--referer\", \"${cb_domain}\" ]\n  - [ chmod, +x, /root/conversions-api-gateway-1.5.2_provision_web.run ]\n  - [ /root/conversions-api-gateway-1.5.2_provision_web.run, --target, /opt/cloudbridge_provision_web ]\n  - [ wget, \"https://conversions-api-gateway-release-production.s3.amazonaws.com/conversions-api-gateway-1.5.2.run\", -O, \"/root/conversions-api-gateway-1.5.2.run\", \"--referer\", \"${cb_domain}\" ]\n  - [ chmod, +x, /root/conversions-api-gateway-1.5.2.run ]\n  - [ /root/conversions-api-gateway-1.5.2.run, --target, /opt/cloudbridge, --, '${cb_template}', '${cb_client_email}', '${cb_ui_passwd}', '${cb_provisioning_data}', '${cb_arg}', '${cloudbridge_active_telemetry_enabled}', '${node_count}', '${image_tag}', '${release_version}', '${custom_ami_enabled}', 'conversions-api-gateway-release-production', '${cb_domain}', '${node_type}', '${cluster_token}', '${vpc_cidr_ipv4}', '${vpc_cidr_ipv6}', '', '${capig_s3_bucket_name}', '${capig_dynamodb_config_table_name}', '${capig_dynamodb_config_kinesis_stream_name}', '${capig_databag_kinesis_stream_name}']"
+          - "cb_domain":
+              Ref: AdminDomainName
+            "cb_ui_passwd":
+              Ref: AdminPassword
+            "cloudbridge_active_telemetry_enabled":
+              Fn::If: [EnableTelemetry, "Yes", "No"]
+            "capig_s3_bucket_name": ""
+            "capig_dynamodb_config_table_name": ""
+            "capig_dynamodb_config_kinesis_stream_name": ""
+            "capig_databag_kinesis_stream_name": ""
+            
+            "cb_provisioning_data":
+              Ref: ProvisioningData
+            "cb_template": "oneboxcluster_bare"
+            "image_tag": "prod"
+            "release_version": "1.5.2"
+            "cb_client_email":
+              Ref: AdminEmail
+            "cb_arg": ""
+            "node_count": 1
+            "custom_ami_enabled": true
+            "node_type": "master"
+            "cluster_token": !Join ['', !Split ['-', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+            
+            "vpc_cidr_ipv4": !GetAtt CustomVPC.CidrBlock
+            "vpc_cidr_ipv6": !Select [ 0, !GetAtt CustomVPC.Ipv6CidrBlocks ]
+            
+      
+      
+      # If usesNLB, advertiser provides custom VPC and subnet
+      
+      SubnetId: !Ref PublicSubnet1
+      
+      
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sda1"
+          Ebs:
+            VolumeSize:
+              Fn::FindInMap:
+              - InstanceType2EBSVolume
+              - Fn::FindInMap:
+                - InstanceTypeMapping
+                - Ref: InstanceType
+                - Type
+              - Volume
+            Encrypted: true
+      Tags:
+        -
+          Key: "Name"
+          Value: !Join ["-", [!Ref AWS::StackName, "cb-bi-t-qsfhro"]]
+  
+  
+  
+  
+  ConversionsApiGatewayRecoveryTestAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Trigger a recovery when instance status check fails for 2
+        consecutive minutes.
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed_Instance
+      Statistic: Minimum
+      Period: '60'
+      EvaluationPeriods: '2'
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: '0'
+      AlarmActions: [ !Sub "arn:aws:automate:${AWS::Region}:ec2:reboot" ]
+      Dimensions:
+      - Name: InstanceId
+        Value:
+          Ref: ConversionsApiGatewayEC2Instance
+  
+  
+  
+Outputs:
+  CallToAction:
+    Description: "Please configure your subdomain for Conversion API Gateway"
+    Value:
+      Fn::Join:
+      - ""
+      - 
+        - "On your DNS Provider, create an A record to associate "
+        - Ref: AdminDomainName
+        
+        - " with "
+        - Fn::GetAtt:
+          - ConversionsApiGatewayEC2Instance
+          - PublicIp
+        - ". Additionally, create an AAAA record for this domain pointing to IPv6 address "
+        - Fn::GetAtt:
+          - IPv6Provider
+          - Ipv6Address
+        
+        
+  ConversionsApiGatewayInstanceURL:
+    Description: "URL for newly created Conversions API Gateway Instance"
+    Value:
+      Fn::Join:
+      - ""
+      - - "http://"
+        
+        - Fn::GetAtt:
+          - ConversionsApiGatewayEC2Instance
+          - PublicDnsName
+        
+        - "/"
+        - Fn::Base64:
+            Fn::Select:
+              - 1
+              - Fn::Split:
+                - "-"
+                - !Ref ConversionsApiGatewayEC2Instance
+  
+  
