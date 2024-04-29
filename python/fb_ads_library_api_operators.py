@@ -36,7 +36,7 @@ def count_ads(generator_ad_archives, args, is_verbose=False):
         count += len(ad_archives)
         if is_verbose:
             print("counting %d" % count)
-    print("Total number of ads match the query: {}".format(count))
+    print(f"Total number of ads match the query: {count}")
 
 
 def save_to_file(generator_ad_archives, args, is_verbose=False):
@@ -128,6 +128,6 @@ def count_start_time_trending(generator_ad_archives, args, is_verbose=False):
     with open(output_file, "w") as csvfile:
         csvfile.write("date, count\n")
         for date in date_to_count.keys():
-            csvfile.write("%s, %s\n" % (date, date_to_count[date]))
+            csvfile.write("{}, {}\n".format(date, date_to_count[date]))
 
     print("Successfully wrote data to file: %s" % output_file)
