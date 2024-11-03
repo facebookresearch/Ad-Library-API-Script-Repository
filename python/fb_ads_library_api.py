@@ -8,7 +8,7 @@
 
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 
@@ -36,7 +36,7 @@ class FbAdsLibraryTraversal:
         country,
         search_page_ids="",
         ad_active_status="ALL",
-        after_date="1970-01-01",
+        after_date="2000-01-01",
         page_limit=500,
         api_version=None,
         retry_limit=3,
@@ -73,15 +73,19 @@ class FbAdsLibraryTraversal:
 
     @staticmethod
     def _get_ad_archives_from_url(
-        next_page_url, after_date="1970-01-01", retry_limit=3
+        next_page_url, after_date="2000-01-01", retry_limit=3
     ):
         last_error_url = None
         last_retry_count = 0
-        start_time_cutoff_after = datetime.strptime(after_date, "%Y-%m-%d").timestamp()
-
+        print("after_date: ", after_date)
+        print("next_page_url: ", next_page_url)
+        start_time_cutoff_after = datetime.strptime(after_date, "%Y-%m-%d")
+        print("start_time_cutoff_after: ", start_time_cutoff_after)
+        start_time_cutoff_after = start_time_cutoff_after.timestamp()
         while next_page_url is not None:
             response = requests.get(next_page_url)
             response_data = json.loads(response.text)
+            print("response_data: ", response_data)
             if "error" in response_data:
                 if next_page_url == last_error_url:
                     # failed again
@@ -121,7 +125,7 @@ class FbAdsLibraryTraversal:
                 next_page_url = None
 
     @classmethod
-    def generate_ad_archives_from_url(cls, failure_url, after_date="1970-01-01"):
+    def generate_ad_archives_from_url(cls, failure_url, after_date="2000-01-01"):
         """
         if we failed from error, later we can just continue from the last failure url
         """
