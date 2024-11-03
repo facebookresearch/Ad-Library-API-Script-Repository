@@ -23,8 +23,7 @@ def get_ad_archive_id(data):
 class FbAdsLibraryTraversal:
     default_url_pattern = (
         "https://graph.facebook.com/{}/ads_archive?access_token={}&"
-        + "fields={}&search_terms={}&ad_reached_countries={}&search_page_ids={}&"
-        + "ad_active_status={}&limit={}"
+        + "fields={}&search_terms={}&ad_reached_countries={}"
     )
     default_api_version = "v21.0"
 
@@ -36,7 +35,18 @@ class FbAdsLibraryTraversal:
         country,
         search_page_ids="",
         ad_active_status="ALL",
+        before_date=None,
         after_date="2000-01-01",
+        ad_type="ALL",
+        bylines=None,
+        delivery_by_region=None,
+        estimated_audience_size_max=None,
+        estimated_audience_size_min=None,
+        languages=None,
+        media_type="ALL",
+        publisher_platforms=None,
+        search_type="KEYWORD_UNORDERED",
+        unmask_removed_content=False,
         page_limit=500,
         api_version=None,
         retry_limit=3,
@@ -44,11 +54,24 @@ class FbAdsLibraryTraversal:
         self.page_count = 0
         self.access_token = access_token
         self.fields = fields
+        if "ad_delivery_start_time" not in self.fields:
+            self.fields += ",ad_delivery_start_time"
         self.search_term = search_term
         self.country = country
-        self.after_date = after_date
         self.search_page_ids = search_page_ids
         self.ad_active_status = ad_active_status
+        self.before_date = before_date
+        self.after_date = after_date
+        self.ad_type = ad_type
+        self.bylines = bylines
+        self.delivery_by_region = delivery_by_region
+        self.estimated_audience_size_max = estimated_audience_size_max
+        self.estimated_audience_size_min = estimated_audience_size_min
+        self.languages = languages
+        self.media_type = media_type
+        self.publisher_platforms = publisher_platforms
+        self.search_type = search_type
+        self.unmask_removed_content = unmask_removed_content
         self.page_limit = page_limit
         self.retry_limit = retry_limit
         if api_version is None:
@@ -57,16 +80,34 @@ class FbAdsLibraryTraversal:
             self.api_version = api_version
 
     def generate_ad_archives(self):
-        next_page_url = self.default_url_pattern.format(
+        base_url = self.default_url_pattern.format(
             self.api_version,
             self.access_token,
             self.fields,
             self.search_term,
             self.country,
-            self.search_page_ids,
-            self.ad_active_status,
-            self.page_limit,
         )
+        optional_params = {
+            "search_page_ids": self.search_page_ids,
+            "ad_active_status": self.ad_active_status,
+            "ad_delivery_date_max": self.before_date,
+            "ad_delivery_date_min": self.after_date if self.after_date != "2000-01-01" else None,
+            "ad_type": self.ad_type,
+            "bylines": self.bylines,
+            "delivery_by_region": self.delivery_by_region,
+            "estimated_audience_size_max": self.estimated_audience_size_max,
+            "estimated_audience_size_min": self.estimated_audience_size_min,
+            "languages": self.languages,
+            "media_type": self.media_type,
+            "publisher_platforms": self.publisher_platforms,
+            "search_type": self.search_type,
+            "unmask_removed_content": self.unmask_removed_content,
+            "limit": self.page_limit,
+        }
+        optional_params_str = "&".join(
+            f"{key}={value}" for key, value in optional_params.items() if value
+        )
+        next_page_url = f"{base_url}&{optional_params_str}"
         return self.__class__._get_ad_archives_from_url(
             next_page_url, after_date=self.after_date, retry_limit=self.retry_limit
         )
