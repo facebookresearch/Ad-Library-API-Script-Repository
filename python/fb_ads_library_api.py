@@ -26,7 +26,7 @@ class FbAdsLibraryTraversal:
         + "fields={}&search_terms={}&ad_reached_countries={}&search_page_ids={}&"
         + "ad_active_status={}&limit={}"
     )
-    default_api_version = "v14.0"
+    default_api_version = "v21.0"
 
     def __init__(
         self,
