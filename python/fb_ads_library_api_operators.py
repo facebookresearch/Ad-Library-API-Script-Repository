@@ -128,6 +128,6 @@ def count_start_time_trending(generator_ad_archives, args, is_verbose=False):
     with open(output_file, "w") as csvfile:
         csvfile.write("date, count\n")
         for date in date_to_count.keys():
-            csvfile.write("{}, {}\n".format(date, date_to_count[date]))
+            csvfile.write(f"{date}, {date_to_count[date]}\n")
 
     print("Successfully wrote data to file: %s" % output_file)
