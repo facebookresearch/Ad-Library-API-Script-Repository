@@ -46,12 +46,55 @@ def get_parser():
         help="Filter by the current status of the ads at the moment the script runs",
     )
     parser.add_argument(
-        "--after-date", help="Only return ads that started delivery after this date"
+        "--before-date", help="Search for ads delivered before this date (inclusive)"
+    )
+    parser.add_argument(
+        "--after-date", help="Search for ads delivered after this date (inclusive)"
+    )
+    parser.add_argument(
+        "--ad-type",
+        help="Search by type of ad",
+        choices=["ALL", "EMPLOYMENT_ADS", "FINANCIAL_PRODUCTS_AND_SERVICES_ADS", "HOUSING_ADS", "POLITICAL_AND_ISSUE_ADS"],
+    )
+    parser.add_argument(
+        "--bylines", help="Filter results for ads with a paid for by disclaimer byline"
+    )
+    parser.add_argument(
+        "--delivery-by-region", help="View ads by the region where Accounts Center accounts were based or located"
+    )
+    parser.add_argument(
+        "--estimated-audience-size-max", type=int, help="Search for ads with a maximum estimated audience size"
+    )
+    parser.add_argument(
+        "--estimated-audience-size-min", type=int, help="Search for ads with a minimum estimated audience size"
+    )
+    parser.add_argument(
+        "--languages", help="Search for ads based on the language(s) contained in the ad"
+    )
+    parser.add_argument(
+        "--media-type",
+        help="Search for ads based on whether they contain a specific type of media",
+        choices=["ALL", "IMAGE", "MEME", "VIDEO", "NONE"],
+    )
+    parser.add_argument(
+        "--publisher-platforms", help="Search for ads based on whether they appear on a particular Meta technology"
+    )
+    parser.add_argument(
+        "--search-type",
+        help="The type of search to use for the search_terms field",
+        choices=["KEYWORD_UNORDERED", "KEYWORD_EXACT_PHRASE"],
+        default="KEYWORD_UNORDERED",
+    )
+    parser.add_argument(
+        "--unmask-removed-content",
+        action="store_true",
+        help="Specify whether you would like your results to reveal content that was removed for violating our standards",
     )
     parser.add_argument("--batch-size", type=int, help="Batch size")
     parser.add_argument(
         "--retry-limit",
         type=int,
+        default=3,
         help="When an error occurs, the script will abort if it fails to get the same batch this amount of times",
     )
     parser.add_argument("-v", "--verbose", action="store_true")
@@ -115,19 +158,27 @@ def main():
         search_term = "."
     else:
         search_term = opts.search_term
+
     api = FbAdsLibraryTraversal(
-        opts.access_token, opts.fields, search_term, opts.country
+        opts.access_token, opts.fields, search_term, opts.country,
+        search_page_ids=opts.search_page_ids if opts.search_page_ids else "",
+        ad_active_status=opts.ad_active_status if opts.ad_active_status else "",
+        before_date=opts.before_date,
+        after_date=opts.after_date if opts.after_date else "2000-01-01",
+        ad_type=opts.ad_type,
+        bylines=opts.bylines,
+        delivery_by_region=opts.delivery_by_region,
+        estimated_audience_size_max=opts.estimated_audience_size_max,
+        estimated_audience_size_min=opts.estimated_audience_size_min,
+        languages=opts.languages,
+        media_type=opts.media_type,
+        publisher_platforms=opts.publisher_platforms,
+        search_type=opts.search_type,
+        unmask_removed_content=opts.unmask_removed_content,
+        page_limit=opts.batch_size,
+        retry_limit=opts.retry_limit,
     )
-    if opts.search_page_ids:
-        api.search_page_ids = opts.search_page_ids
-    if opts.ad_active_status:
-        api.ad_active_status = opts.ad_active_status
-    if opts.batch_size:
-        api.page_limit = opts.batch_size
-    if opts.retry_limit:
-        api.retry_limit = opts.retry_limit
-    if opts.after_date:
-        api.after_date = opts.after_date
+
     generator_ad_archives = api.generate_ad_archives()
     if opts.action in get_operators():
         if opts.action == "save_to_csv":
